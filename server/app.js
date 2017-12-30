@@ -95,10 +95,30 @@ app.post('/signup', function(req, res) {
             res.redirect('/');
           });
       }
-    });
-    
+    }); 
 });
 
+app.get('/login', function(req, res) {
+  res.render('login');
+});
+
+app.post('/login', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+
+  return models.Users.get({username: username})
+    .then(function(found) {
+      if (found) {
+        if (models.Users.compare(password, found.password, found.salt)) {
+          res.redirect('/');
+        } else {
+          res.redirect('/login');
+        }
+      } else {
+        res.redirect('/login');
+      }
+    });
+});
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
 // assume the route is a short code and try and handle it here.
