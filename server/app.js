@@ -18,15 +18,15 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(require('./middleware/cookieParser'));
 app.use(Auth.createSession);
 
-app.get('/', (req, res) => {
+app.get('/', Auth.verifySession, (req, res) => {
   res.render('index');
 });
 
-app.get('/create', (req, res) => {
+app.get('/create', Auth.verifySession, (req, res) => {
   res.render('index');
 });
 
-app.get('/links', (req, res, next) => {
+app.get('/links', Auth.verifySession, (req, res, next) => {
   models.Links.getAll()
     .then(links => {
       res.status(200).send(links);
@@ -36,7 +36,7 @@ app.get('/links', (req, res, next) => {
     });
 });
 
-app.post('/links', (req, res, next) => {
+app.post('/links', Auth.verifySession, (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
     // send back a 404 if link is not valid
