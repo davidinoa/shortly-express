@@ -15,7 +15,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-
+app.use(require('./middleware/cookieParser'));
+app.use(Auth.createSession);
 
 app.get('/', (req, res) => {
   res.render('index');
@@ -92,6 +93,9 @@ app.post('/signup', function(req, res) {
           password: password 
         })
           .then(function(newUser) {
+            if (req.session) {
+              models.Sessions.update({ hash: req.session.hash }, { userId: newUser.insertId });
+            }
             res.redirect('/');
           });
       }
@@ -117,6 +121,14 @@ app.post('/login', function(req, res) {
       } else {
         res.redirect('/login');
       }
+    });
+});
+
+app.get('/logout', (req, res, next) => {
+  return models.Sessions.delete({ hash: req.cookies.shortlyid })
+    .then(() => {
+      res.clearCookie('shortlyid');
+      res.redirect('/login');
     });
 });
 /************************************************************/
